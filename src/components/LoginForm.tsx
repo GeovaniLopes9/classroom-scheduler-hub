@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { User, LogOut } from 'lucide-react';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -18,19 +19,26 @@ const LoginForm = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [open, setOpen] = useState(false);
+  const [error, setError] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
+    
     const success = login(username, password);
     if (success) {
       setOpen(false);
       setUsername('');
       setPassword('');
+      toast.success('Login realizado com sucesso!');
+    } else {
+      setError('Credenciais inválidas');
     }
   };
 
   const handleLogout = () => {
     logout();
+    toast.success('Logout realizado com sucesso!');
   };
 
   return (
@@ -79,6 +87,9 @@ const LoginForm = () => {
                 required
               />
             </div>
+            {error && (
+              <div className="text-sm text-red-500 font-medium">{error}</div>
+            )}
             <div className="flex justify-end">
               <Button type="submit">Entrar</Button>
             </div>
