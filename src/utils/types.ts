@@ -28,12 +28,22 @@ export interface ScheduleState {
   currentDay: DayOfWeek;
 }
 
+export interface User {
+  username: string;
+  isAdmin: boolean;
+}
+
 export interface ScheduleContextType {
   schedule: ScheduleState;
+  user: User | null;
+  login: (username: string, password: string) => boolean;
+  logout: () => void;
   addClass: (newClass: Omit<ClassSession, 'id'>) => void;
   updateClass: (id: string, updatedClass: Partial<ClassSession>) => void;
   removeClass: (id: string) => void;
   setCurrentDay: (day: DayOfWeek) => void;
   updateClassColor: (classGroup: ClassGroup, color: string) => void;
   updateTimeSlot: (index: number, updatedSlot: Partial<TimeSlot>) => void;
+  addTimeSlot: (newSlot: TimeSlot) => void;
+  removeTimeSlot: (index: number) => void;
 }

@@ -7,7 +7,8 @@ import {
   ScheduleState, 
   ClassGroup, 
   TimeSlot, 
-  DayOfWeek 
+  DayOfWeek,
+  User
 } from '../utils/types';
 import { getInitialScheduleData } from '../utils/initialData';
 import { toast } from 'sonner';
@@ -29,12 +30,56 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     return getInitialScheduleData();
   });
 
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem('scheduleUser');
+    if (savedUser) {
+      try {
+        return JSON.parse(savedUser);
+      } catch (error) {
+        console.error('Error parsing saved user data:', error);
+        return null;
+      }
+    }
+    return null;
+  });
+
   // Save to localStorage whenever schedule changes
   useEffect(() => {
     localStorage.setItem('scheduleData', JSON.stringify(schedule));
   }, [schedule]);
 
+  // Save user to localStorage whenever it changes
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('scheduleUser', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('scheduleUser');
+    }
+  }, [user]);
+
+  const login = (username: string, password: string): boolean => {
+    // For demonstration purposes, hardcoded admin credentials
+    // In a real application, this should be authenticated against a secure database
+    if (username === 'admin' && password === 'admin123') {
+      setUser({ username, isAdmin: true });
+      toast.success('Login realizado com sucesso!');
+      return true;
+    }
+    toast.error('Credenciais inválidas');
+    return false;
+  };
+
+  const logout = () => {
+    setUser(null);
+    toast.success('Logout realizado com sucesso!');
+  };
+
   const addClass = (newClass: Omit<ClassSession, 'id'>) => {
+    if (!user?.isAdmin) {
+      toast.error('Apenas administradores podem adicionar aulas');
+      return;
+    }
+    
     setSchedule(prev => {
       // If no color is specified, use the class group's color or generate a vibrant one
       const classColor = newClass.color || prev.classColors[newClass.classGroup];
@@ -46,6 +91,11 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const updateClass = (id: string, updatedClass: Partial<ClassSession>) => {
+    if (!user?.isAdmin) {
+      toast.error('Apenas administradores podem atualizar aulas');
+      return;
+    }
+    
     setSchedule(prev => {
       const updatedClasses = prev.classes.map(c => 
         c.id === id ? { ...c, ...updatedClass } : c
@@ -56,6 +106,11 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const removeClass = (id: string) => {
+    if (!user?.isAdmin) {
+      toast.error('Apenas administradores podem remover aulas');
+      return;
+    }
+    
     setSchedule(prev => {
       const updatedClasses = prev.classes.filter(c => c.id !== id);
       toast.success('Aula removida com sucesso');
@@ -68,6 +123,11 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const updateClassColor = (classGroup: ClassGroup, color: string) => {
+    if (!user?.isAdmin) {
+      toast.error('Apenas administradores podem atualizar cores');
+      return;
+    }
+    
     setSchedule(prev => {
       const updatedColors = { ...prev.classColors, [classGroup]: color };
       toast.success(`Cor da turma ${classGroup} atualizada`);
@@ -76,6 +136,11 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   };
 
   const updateTimeSlot = (index: number, updatedSlot: Partial<TimeSlot>) => {
+    if (!user?.isAdmin) {
+      toast.error('Apenas administradores podem atualizar horários');
+      return;
+    }
+    
     setSchedule(prev => {
       const updatedTimeSlots = [...prev.timeSlots];
       updatedTimeSlots[index] = { ...updatedTimeSlots[index], ...updatedSlot };
@@ -84,14 +149,52 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     });
   };
 
+  const addTimeSlot = (newSlot: TimeSlot) => {
+    if (!user?.isAdmin) {
+      toast.error('Apenas administradores podem adicionar horários');
+      return;
+    }
+    
+    setSchedule(prev => {
+      const updatedTimeSlots = [...prev.timeSlots, newSlot];
+      // Sort time slots by start time
+      updatedTimeSlots.sort((a, b) => {
+        const timeA = a.start.split(':').map(Number);
+        const timeB = b.start.split(':').map(Number);
+        return (timeA[0] * 60 + timeA[1]) - (timeB[0] * 60 + timeB[1]);
+      });
+      toast.success('Novo horário adicionado com sucesso');
+      return { ...prev, timeSlots: updatedTimeSlots };
+    });
+  };
+
+  const removeTimeSlot = (index: number) => {
+    if (!user?.isAdmin) {
+      toast.error('Apenas administradores podem remover horários');
+      return;
+    }
+    
+    setSchedule(prev => {
+      const updatedTimeSlots = [...prev.timeSlots];
+      updatedTimeSlots.splice(index, 1);
+      toast.success('Horário removido com sucesso');
+      return { ...prev, timeSlots: updatedTimeSlots };
+    });
+  };
+
   const value: ScheduleContextType = {
     schedule,
+    user,
+    login,
+    logout,
     addClass,
     updateClass,
     removeClass,
     setCurrentDay,
     updateClassColor,
     updateTimeSlot,
+    addTimeSlot,
+    removeTimeSlot,
   };
 
   return (

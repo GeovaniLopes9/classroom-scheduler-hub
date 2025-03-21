@@ -4,6 +4,7 @@ import { useSchedule } from '../contexts/ScheduleContext';
 import { DayOfWeek, ClassGroup, TimeSlot } from '../utils/types';
 import ClassCard from './ClassCard';
 import AddClassButton from './AddClassButton';
+import TimeSlotEditor, { AddTimeSlot } from './TimeSlotEditor';
 import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 
@@ -12,7 +13,7 @@ interface DayPanelProps {
 }
 
 const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
-  const { schedule } = useSchedule();
+  const { schedule, user } = useSchedule();
   const { classes, timeSlots, classColors } = schedule;
 
   const dayClasses = classes.filter(c => c.day === day);
@@ -46,25 +47,30 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
 
   return (
     <div className="overflow-auto pb-10">
-      <div className="mt-6 mb-10">
-        <h3 className="text-xl font-medium mb-4">Turmas</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
-          {allClassGroups.map((classGroup) => (
-            <motion.div 
-              key={classGroup}
-              variants={item}
-              className="flex items-center justify-between p-3 rounded-lg border shadow-sm"
-              style={{ backgroundColor: `${classColors[classGroup]}40` }}
-            >
-              <span className="text-sm font-medium">{classGroup}</span>
-              <AddClassButton classGroup={classGroup} day={day} />
-            </motion.div>
-          ))}
+      {user?.isAdmin && (
+        <div className="mt-6 mb-10">
+          <h3 className="text-xl font-medium mb-4">Turmas</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            {allClassGroups.map((classGroup) => (
+              <motion.div 
+                key={classGroup}
+                variants={item}
+                className="flex items-center justify-between p-3 rounded-lg border shadow-sm"
+                style={{ backgroundColor: `${classColors[classGroup]}40` }}
+              >
+                <span className="text-sm font-medium">{classGroup}</span>
+                <AddClassButton classGroup={classGroup} day={day} />
+              </motion.div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
       
       <div className="mt-8">
-        <h3 className="text-xl font-medium mb-4">Horários do Dia</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-medium">Horários do Dia</h3>
+        </div>
+        
         <motion.div 
           className="grid gap-4"
           variants={container}
@@ -94,7 +100,7 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
                     )}
                   </div>
                   <div className="text-sm font-bold bg-secondary py-1 px-3 rounded-full">
-                    {slot.start} - {slot.end}
+                    <TimeSlotEditor slot={slot} index={index} />
                   </div>
                 </div>
                 
@@ -121,6 +127,8 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
               </div>
             </motion.div>
           ))}
+          
+          <AddTimeSlot />
         </motion.div>
       </div>
     </div>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSchedule } from '../contexts/ScheduleContext';
 import DayPanel from './DayPanel';
+import LoginForm from './LoginForm';
 import { DayOfWeek } from '../utils/types';
 import { motion } from 'framer-motion';
 import { Settings } from 'lucide-react';
@@ -16,7 +17,7 @@ import {
 } from "@/components/ui/sheet";
 
 const Layout = () => {
-  const { schedule, setCurrentDay } = useSchedule();
+  const { schedule, setCurrentDay, user } = useSchedule();
   const [showSettings, setShowSettings] = useState(false);
   const [backgroundImage, setBackgroundImage] = useState<string | null>(
     localStorage.getItem('backgroundImage')
@@ -72,42 +73,46 @@ const Layout = () => {
           </div>
 
           <div className="flex space-x-2">
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Settings size={16} /> Configurações
-                </Button>
-              </SheetTrigger>
-              <SheetContent>
-                <SheetHeader>
-                  <SheetTitle>Configurações</SheetTitle>
-                </SheetHeader>
-                <div className="py-6 space-y-6">
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium">Imagem de fundo</h3>
-                    <div className="flex flex-col space-y-2">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleBackgroundChange}
-                        className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-primary/90"
-                      />
-                      {backgroundImage && (
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={clearBackground}
-                          className="mt-2"
-                        >
-                          Remover imagem de fundo
-                        </Button>
-                      )}
+            <LoginForm />
+            
+            {user?.isAdmin && (
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Settings size={16} /> Configurações
+                  </Button>
+                </SheetTrigger>
+                <SheetContent>
+                  <SheetHeader>
+                    <SheetTitle>Configurações</SheetTitle>
+                  </SheetHeader>
+                  <div className="py-6 space-y-6">
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium">Imagem de fundo</h3>
+                      <div className="flex flex-col space-y-2">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleBackgroundChange}
+                          className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-white hover:file:bg-primary/90"
+                        />
+                        {backgroundImage && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={clearBackground}
+                            className="mt-2"
+                          >
+                            Remover imagem de fundo
+                          </Button>
+                        )}
+                      </div>
                     </div>
+                    <ColorSettings />
                   </div>
-                  <ColorSettings />
-                </div>
-              </SheetContent>
-            </Sheet>
+                </SheetContent>
+              </Sheet>
+            )}
           </div>
         </header>
 

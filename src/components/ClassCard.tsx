@@ -22,7 +22,7 @@ interface ClassCardProps {
 }
 
 const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
-  const { updateClass, removeClass } = useSchedule();
+  const { updateClass, removeClass, user } = useSchedule();
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [editedClass, setEditedClass] = useState(classSession);
@@ -155,7 +155,7 @@ const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
         initial="initial"
         animate="animate"
         exit="exit"
-        whileHover="hover"
+        whileHover={user?.isAdmin ? "hover" : undefined}
         className="p-3 rounded-lg shadow-sm transition-all duration-200 border relative overflow-hidden"
         style={{ 
           backgroundColor: `${classSession.color || color}30`, 
@@ -182,20 +182,22 @@ const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
               Turma {classSession.classGroup}
             </Badge>
             
-            <div className="flex gap-1">
-              <button 
-                onClick={() => setIsEditing(true)}
-                className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-black/5 transition-colors"
-              >
-                <Edit size={14} />
-              </button>
-              <button 
-                onClick={() => setIsDeleting(true)}
-                className="text-muted-foreground hover:text-destructive p-1 rounded-full hover:bg-black/5 transition-colors"
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
+            {user?.isAdmin && (
+              <div className="flex gap-1">
+                <button 
+                  onClick={() => setIsEditing(true)}
+                  className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-black/5 transition-colors"
+                >
+                  <Edit size={14} />
+                </button>
+                <button 
+                  onClick={() => setIsDeleting(true)}
+                  className="text-muted-foreground hover:text-destructive p-1 rounded-full hover:bg-black/5 transition-colors"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            )}
           </div>
           
           <div className="mt-2">

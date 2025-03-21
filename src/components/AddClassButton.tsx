@@ -21,7 +21,7 @@ interface AddClassButtonProps {
 }
 
 const AddClassButton: React.FC<AddClassButtonProps> = ({ classGroup, day }) => {
-  const { addClass, schedule } = useSchedule();
+  const { addClass, schedule, user } = useSchedule();
   const [open, setOpen] = useState(false);
   const [newClass, setNewClass] = useState({
     teacher: '',
@@ -57,6 +57,10 @@ const AddClassButton: React.FC<AddClassButtonProps> = ({ classGroup, day }) => {
     });
     setOpen(false);
   };
+
+  if (!user?.isAdmin) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
