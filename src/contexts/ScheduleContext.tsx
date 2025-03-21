@@ -24,7 +24,10 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addClass = (newClass: Omit<ClassSession, 'id'>) => {
     setSchedule(prev => {
-      const updatedClasses = [...prev.classes, { ...newClass, id: uuidv4() }];
+      // If no color is specified, use the class group's color
+      const classColor = newClass.color || prev.classColors[newClass.classGroup];
+      const newClassWithId = { ...newClass, id: uuidv4(), color: classColor };
+      const updatedClasses = [...prev.classes, newClassWithId];
       toast.success('Aula adicionada com sucesso');
       return { ...prev, classes: updatedClasses };
     });

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { ClassSession } from '../utils/types';
 import { useSchedule } from '../contexts/ScheduleContext';
 import { motion } from 'framer-motion';
-import { Edit, Trash2, X, Check } from 'lucide-react';
+import { Edit, Trash2, X, Check, Palette } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -25,6 +25,7 @@ const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [editedClass, setEditedClass] = useState(classSession);
+  const [selectedColor, setSelectedColor] = useState(classSession.color || color);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -32,7 +33,10 @@ const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
   };
 
   const handleSave = () => {
-    updateClass(classSession.id, editedClass);
+    updateClass(classSession.id, {
+      ...editedClass,
+      color: selectedColor
+    });
     setIsEditing(false);
   };
 
@@ -103,6 +107,23 @@ const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
               className="h-8 mt-1"
             />
           </div>
+
+          <div>
+            <Label htmlFor="color" className="text-xs">Cor da aula</Label>
+            <div className="flex items-center gap-2 mt-1">
+              <div 
+                className="w-8 h-8 rounded-md border" 
+                style={{ backgroundColor: selectedColor }}
+              />
+              <Input
+                id="color"
+                type="color"
+                value={selectedColor}
+                onChange={(e) => setSelectedColor(e.target.value)}
+                className="w-full h-8"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 mt-4">
@@ -136,20 +157,20 @@ const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
         whileHover="hover"
         className="p-3 rounded-lg shadow-sm transition-all duration-200 border relative overflow-hidden"
         style={{ 
-          backgroundColor: `${color}60`, 
-          borderColor: `${color}80` 
+          backgroundColor: `${classSession.color || color}60`, 
+          borderColor: `${classSession.color || color}80` 
         }}
       >
         {/* Color indicator */}
         <div 
           className="absolute left-0 top-0 bottom-0 w-1" 
-          style={{ backgroundColor: color }}
+          style={{ backgroundColor: classSession.color || color }}
         ></div>
         
         <div className="pl-2">
           <div className="flex justify-between items-start mb-1">
             <h4 className="font-medium text-sm">
-              {classSession.subject || 'Sem matéria'}
+              {classSession.subject || 'Sem matéria'} <span className="ml-1 text-xs font-normal">({classSession.classGroup})</span>
             </h4>
             <div className="flex gap-1">
               <button 
@@ -174,7 +195,6 @@ const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
             {classSession.room && (
               <p className="text-muted-foreground">Sala {classSession.room}</p>
             )}
-            <p className="text-foreground font-medium">{classSession.timeSlot}</p>
           </div>
         </div>
       </motion.div>

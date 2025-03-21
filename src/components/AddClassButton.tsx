@@ -28,6 +28,7 @@ const AddClassButton: React.FC<AddClassButtonProps> = ({ classGroup, day }) => {
     subject: '',
     room: '',
     timeSlot: '',
+    color: schedule.classColors[classGroup],
   });
 
   const nonBreakTimeSlots = schedule.timeSlots.filter(slot => !slot.isBreak);
@@ -52,6 +53,7 @@ const AddClassButton: React.FC<AddClassButtonProps> = ({ classGroup, day }) => {
       subject: '',
       room: '',
       timeSlot: '',
+      color: schedule.classColors[classGroup],
     });
     setOpen(false);
   };
@@ -116,6 +118,24 @@ const AddClassButton: React.FC<AddClassButtonProps> = ({ classGroup, day }) => {
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="color">Cor da aula</Label>
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-8 h-8 rounded-md border" 
+                  style={{ backgroundColor: newClass.color }}
+                />
+                <Input
+                  id="color"
+                  name="color"
+                  type="color"
+                  value={newClass.color}
+                  onChange={handleInputChange}
+                  className="w-full h-8"
+                />
+              </div>
             </div>
           </div>
           

@@ -32,55 +32,40 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
     show: { y: 0, opacity: 1 },
   };
 
+  // Group classes by time slot
+  const classesByTimeSlot = timeSlots.reduce((acc, slot) => {
+    if (slot.isBreak) return acc;
+    
+    const timeSlotFormatted = `${slot.start} - ${slot.end}`;
+    const classesInTimeSlot = dayClasses.filter(c => c.timeSlot === timeSlotFormatted);
+    
+    acc[timeSlotFormatted] = classesInTimeSlot;
+    return acc;
+  }, {} as Record<string, typeof dayClasses>);
+
   return (
     <div className="overflow-auto pb-10">
-      <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {allClassGroups.map((classGroup) => (
-          <motion.div 
-            key={classGroup}
-            variants={item}
-            initial="hidden"
-            animate="show"
-            className="relative rounded-xl p-4 glass class-card-shadow"
-            style={{ backgroundColor: `${classColors[classGroup]}40` }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xl font-medium">{classGroup}</h3>
+      <div className="mt-6 mb-10">
+        <h3 className="text-xl font-medium mb-4">Turmas</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+          {allClassGroups.map((classGroup) => (
+            <motion.div 
+              key={classGroup}
+              variants={item}
+              className="flex items-center justify-between p-3 rounded-lg border"
+              style={{ backgroundColor: `${classColors[classGroup]}40` }}
+            >
+              <span className="text-sm font-medium">{classGroup}</span>
               <AddClassButton classGroup={classGroup} day={day} />
-            </div>
-            
-            <div className="space-y-2">
-              {dayClasses
-                .filter(c => c.classGroup === classGroup)
-                .sort((a, b) => {
-                  // Extract start times for sorting
-                  const aTime = a.timeSlot.split(' - ')[0];
-                  const bTime = b.timeSlot.split(' - ')[0];
-                  return aTime.localeCompare(bTime);
-                })
-                .map((classSession) => (
-                  <ClassCard
-                    key={classSession.id}
-                    classSession={classSession}
-                    color={classColors[classGroup]}
-                  />
-                ))}
-              
-              {/* Empty state */}
-              {dayClasses.filter(c => c.classGroup === classGroup).length === 0 && (
-                <div className="text-center py-6 text-muted-foreground text-sm">
-                  Nenhuma aula programada
-                </div>
-              )}
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </div>
       
-      <div className="mt-10">
+      <div className="mt-8">
         <h3 className="text-xl font-medium mb-4">Horários do Dia</h3>
         <motion.div 
-          className="grid gap-2"
+          className="grid gap-4"
           variants={container}
           initial="hidden"
           animate="show"
@@ -95,17 +80,40 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
                   : 'bg-card shadow-sm border'
               }`}
             >
-              <div className="flex justify-between items-center">
-                <div className="font-medium">
-                  {slot.isBreak ? (
-                    <span className="text-primary">{slot.breakName}</span>
-                  ) : (
-                    <span>Aula</span>
-                  )}
+              <div className="flex flex-col gap-3">
+                <div className="flex justify-between items-center">
+                  <div className="font-medium">
+                    {slot.isBreak ? (
+                      <span className="text-primary">{slot.breakName}</span>
+                    ) : (
+                      <span>Aula</span>
+                    )}
+                  </div>
+                  <div className="text-sm">
+                    {slot.start} - {slot.end}
+                  </div>
                 </div>
-                <div className="text-sm">
-                  {slot.start} - {slot.end}
-                </div>
+                
+                {!slot.isBreak && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mt-2">
+                    {classesByTimeSlot[`${slot.start} - ${slot.end}`]?.map((classSession) => (
+                      <ClassCard
+                        key={classSession.id}
+                        classSession={classSession}
+                        // Use the class group color as a default, but individual class color if available
+                        color={classSession.color || classColors[classSession.classGroup]}
+                      />
+                    ))}
+                    
+                    {/* Show empty state if no classes in this time slot */}
+                    {(!classesByTimeSlot[`${slot.start} - ${slot.end}`] || 
+                      classesByTimeSlot[`${slot.start} - ${slot.end}`].length === 0) && (
+                      <div className="text-center p-4 text-muted-foreground text-sm border border-dashed rounded-lg">
+                        Nenhuma aula neste horário
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </motion.div>
           ))}
