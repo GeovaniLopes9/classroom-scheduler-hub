@@ -15,7 +15,19 @@ import { toast } from 'sonner';
 const ScheduleContext = createContext<ScheduleContextType | undefined>(undefined);
 
 export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [schedule, setSchedule] = useState<ScheduleState>(getInitialScheduleData());
+  const [schedule, setSchedule] = useState<ScheduleState>(() => {
+    // Try to load from localStorage first
+    const savedData = localStorage.getItem('scheduleData');
+    if (savedData) {
+      try {
+        return JSON.parse(savedData);
+      } catch (error) {
+        console.error('Error parsing saved schedule data:', error);
+        return getInitialScheduleData();
+      }
+    }
+    return getInitialScheduleData();
+  });
 
   // Save to localStorage whenever schedule changes
   useEffect(() => {
@@ -24,7 +36,7 @@ export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const addClass = (newClass: Omit<ClassSession, 'id'>) => {
     setSchedule(prev => {
-      // If no color is specified, use the class group's color
+      // If no color is specified, use the class group's color or generate a vibrant one
       const classColor = newClass.color || prev.classColors[newClass.classGroup];
       const newClassWithId = { ...newClass, id: uuidv4(), color: classColor };
       const updatedClasses = [...prev.classes, newClassWithId];

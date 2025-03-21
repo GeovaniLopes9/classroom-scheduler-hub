@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { ClassSession } from '../utils/types';
 import { useSchedule } from '../contexts/ScheduleContext';
 import { motion } from 'framer-motion';
-import { Edit, Trash2, X, Check, Palette } from 'lucide-react';
+import { Edit, Trash2, X, Check, Users } from 'lucide-react';
 import { 
   Dialog, 
   DialogContent, 
@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
 interface ClassCardProps {
   classSession: ClassSession;
@@ -157,21 +158,30 @@ const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
         whileHover="hover"
         className="p-3 rounded-lg shadow-sm transition-all duration-200 border relative overflow-hidden"
         style={{ 
-          backgroundColor: `${classSession.color || color}60`, 
+          backgroundColor: `${classSession.color || color}30`, 
           borderColor: `${classSession.color || color}80` 
         }}
       >
         {/* Color indicator */}
         <div 
-          className="absolute left-0 top-0 bottom-0 w-1" 
+          className="absolute left-0 top-0 bottom-0 w-1.5" 
           style={{ backgroundColor: classSession.color || color }}
         ></div>
         
-        <div className="pl-2">
-          <div className="flex justify-between items-start mb-1">
-            <h4 className="font-medium text-sm">
-              {classSession.subject || 'Sem matéria'} <span className="ml-1 text-xs font-normal">({classSession.classGroup})</span>
-            </h4>
+        <div className="pl-2.5">
+          {/* Class group badge at the top */}
+          <div className="flex justify-between items-center mb-1.5">
+            <Badge 
+              className="px-2 py-0.5 text-xs font-semibold"
+              style={{ 
+                backgroundColor: `${classSession.color || color}80`,
+                color: '#fff'
+              }}
+            >
+              <Users size={12} className="mr-1" />
+              Turma {classSession.classGroup}
+            </Badge>
+            
             <div className="flex gap-1">
               <button 
                 onClick={() => setIsEditing(true)}
@@ -188,13 +198,19 @@ const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
             </div>
           </div>
           
-          <div className="space-y-1 text-xs">
-            {classSession.teacher && (
-              <p className="text-muted-foreground">Prof. {classSession.teacher}</p>
-            )}
-            {classSession.room && (
-              <p className="text-muted-foreground">Sala {classSession.room}</p>
-            )}
+          <div className="mt-2">
+            <h4 className="font-medium text-sm">
+              {classSession.subject || 'Sem matéria'}
+            </h4>
+            
+            <div className="space-y-1 text-xs mt-1.5">
+              {classSession.teacher && (
+                <p className="text-muted-foreground font-medium">Prof. {classSession.teacher}</p>
+              )}
+              {classSession.room && (
+                <p className="text-muted-foreground">Sala {classSession.room}</p>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>

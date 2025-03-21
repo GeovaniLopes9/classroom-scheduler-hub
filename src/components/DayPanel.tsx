@@ -5,6 +5,7 @@ import { DayOfWeek, ClassGroup, TimeSlot } from '../utils/types';
 import ClassCard from './ClassCard';
 import AddClassButton from './AddClassButton';
 import { motion } from 'framer-motion';
+import { Clock } from 'lucide-react';
 
 interface DayPanelProps {
   day: DayOfWeek;
@@ -52,7 +53,7 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
             <motion.div 
               key={classGroup}
               variants={item}
-              className="flex items-center justify-between p-3 rounded-lg border"
+              className="flex items-center justify-between p-3 rounded-lg border shadow-sm"
               style={{ backgroundColor: `${classColors[classGroup]}40` }}
             >
               <span className="text-sm font-medium">{classGroup}</span>
@@ -74,22 +75,25 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
             <motion.div 
               key={index}
               variants={item}
-              className={`p-3 rounded-lg ${
+              className={`relative p-4 rounded-lg ${
                 slot.isBreak 
                   ? 'bg-primary/10 border border-primary/20' 
                   : 'bg-card shadow-sm border'
               }`}
             >
               <div className="flex flex-col gap-3">
-                <div className="flex justify-between items-center">
-                  <div className="font-medium">
+                <div className="flex justify-between items-center mb-2">
+                  <div className="font-medium flex items-center">
                     {slot.isBreak ? (
-                      <span className="text-primary">{slot.breakName}</span>
+                      <span className="text-primary font-semibold">{slot.breakName}</span>
                     ) : (
-                      <span>Aula</span>
+                      <span className="flex items-center">
+                        <Clock size={16} className="mr-2 text-primary" />
+                        <span>Aula</span>
+                      </span>
                     )}
                   </div>
-                  <div className="text-sm">
+                  <div className="text-sm font-bold bg-secondary py-1 px-3 rounded-full">
                     {slot.start} - {slot.end}
                   </div>
                 </div>
