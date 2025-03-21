@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { ClassSession } from '../utils/types';
 import { useSchedule } from '../contexts/ScheduleContext';
@@ -172,10 +171,9 @@ const ClassCard: React.FC<ClassCardProps> = ({ classSession, color }) => {
           {/* Class group badge at the top */}
           <div className="flex justify-between items-center mb-1.5">
             <Badge 
-              className="px-2 py-0.5 text-xs font-semibold"
+              className="px-2 py-0.5 text-xs font-semibold text-black"
               style={{ 
                 backgroundColor: `${classSession.color || color}80`,
-                color: '#fff'
               }}
             >
               <Users size={12} className="mr-1" />

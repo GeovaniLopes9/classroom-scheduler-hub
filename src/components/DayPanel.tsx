@@ -41,9 +41,21 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
     const timeSlotFormatted = `${slot.start} - ${slot.end}`;
     const classesInTimeSlot = dayClasses.filter(c => c.timeSlot === timeSlotFormatted);
     
-    acc[timeSlotFormatted] = classesInTimeSlot;
+    if (classesInTimeSlot.length > 0 || user?.isAdmin) {
+      acc[timeSlotFormatted] = classesInTimeSlot;
+    }
     return acc;
   }, {} as Record<string, typeof dayClasses>);
+
+  // Filter time slots to only show ones with classes or break slots (for non-admin users)
+  const filteredTimeSlots = timeSlots.filter(slot => {
+    if (user?.isAdmin) return true; // Show all time slots for admin users
+    if (slot.isBreak) return true; // Always show break slots
+    
+    const timeSlotFormatted = `${slot.start} - ${slot.end}`;
+    const hasClasses = dayClasses.some(c => c.timeSlot === timeSlotFormatted);
+    return hasClasses; // Only show time slots with classes for non-admin users
+  });
 
   return (
     <div className="overflow-auto pb-10">
@@ -77,7 +89,7 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
           initial="hidden"
           animate="show"
         >
-          {timeSlots.map((slot, index) => (
+          {filteredTimeSlots.map((slot, index) => (
             <motion.div 
               key={index}
               variants={item}
@@ -100,7 +112,7 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
                     )}
                   </div>
                   <div className="text-sm font-bold bg-secondary py-1 px-3 rounded-full">
-                    <TimeSlotEditor slot={slot} index={index} />
+                    <TimeSlotEditor slot={slot} index={timeSlots.indexOf(slot)} />
                   </div>
                 </div>
                 
@@ -115,8 +127,8 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
                       />
                     ))}
                     
-                    {/* Show empty state if no classes in this time slot */}
-                    {(!classesByTimeSlot[`${slot.start} - ${slot.end}`] || 
+                    {/* Show empty state if no classes in this time slot (only for admin) */}
+                    {user?.isAdmin && (!classesByTimeSlot[`${slot.start} - ${slot.end}`] || 
                       classesByTimeSlot[`${slot.start} - ${slot.end}`].length === 0) && (
                       <div className="text-center p-4 text-muted-foreground text-sm border border-dashed rounded-lg">
                         Nenhuma aula neste horário
@@ -128,7 +140,7 @@ const DayPanel: React.FC<DayPanelProps> = ({ day }) => {
             </motion.div>
           ))}
           
-          <AddTimeSlot />
+          {user?.isAdmin && <AddTimeSlot />}
         </motion.div>
       </div>
     </div>
